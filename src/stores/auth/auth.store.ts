@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+
 import { IUser } from '../../interfaces/user';
 import { Nullable } from '../../types/index';
 

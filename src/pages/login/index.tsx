@@ -1,55 +1,52 @@
-import React, { useEffect, useState } from "react"
-import { signIn, useSession, signOut, getCsrfToken } from "next-auth/react"
+import React, { useState } from "react"
 import type { NextPage } from "next"
 import { useRouter } from "next/router"
 import { GetServerSideProps } from "next"
-import Link from "next/link"
 
 import { Input } from "../../components/input"
 import { Button } from "../../components/button"
 import { validateCredentials } from "../../utils/validation"
-
-import styles from "./login.module.scss"
 import { ModeChooser } from "../../components/mode-chooser"
+import { AuthService } from "../../services/auth.service"
+import { useStore } from "../../stores/root-store"
+import { getSessionServer } from "../../utils/session"
 
-interface LoginProps {
-  csrfToken: string
-}
+import styled from "styled-components"
+import { backgroundColor } from "../../common/colors"
 
 export type IMode = "signIn" | "signUp"
 
-const Login: NextPage<LoginProps> = ({ csrfToken }) => {
+const Login: NextPage = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [mode, setMode] = useState<IMode>("signIn")
+  const [errors, setErrors] = useState<string[]>([])
+  const { push } = useRouter()
+  const { authStore } = useStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!validateCredentials(email, password)) return
 
-    const res = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    })
+    try {
+      const user = await AuthService.login({
+        username: email,
+        password: password,
+      })
+      authStore.setUser(user)
+      push("/")
+    } catch (e: any) {
+      setErrors((prev) => [...prev, e.message])
+    }
   }
 
-  const session = useSession()
-  const { push } = useRouter()
-
-  useEffect(() => {
-    if (session.status === "authenticated") {
-      push("/")
-    }
-  }, [session.status])
-
   return (
-    <div className={styles.loginPageWrapper}>
-      <div className={styles.loginPage}>
-        <form onSubmit={handleSubmit}>
-          <ModeChooser setMode={setMode} mode={mode} />
-          <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+    <LoginWrapper>
+      <StyledLogin>
+        <ModeChooser setMode={setMode} mode={mode} />
+        <StyledForm onSubmit={handleSubmit}>
+          {/* <input name="csrfToken" type="hidden" defaultValue={csrfToken} /> */}
           <Input
             value={email}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -63,21 +60,75 @@ const Login: NextPage<LoginProps> = ({ csrfToken }) => {
               setPassword(e.target.value)
             }
           />
-          <Button type="submit">
+          <StyledButton type="submit">
             {mode === "signIn" ? "Sign In" : "Registration"}
-          </Button>
-        </form>
-      </div>
-    </div>
+          </StyledButton>
+        </StyledForm>
+      </StyledLogin>
+    </LoginWrapper>
   )
 }
+
+const LoginWrapper = styled.div`
+    height: 100vh;
+    width: 100vw;
+    background-color:${backgroundColor};
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`
+
+const StyledLogin = styled.div`
+  width: 500px;
+  height: 300px;
+  box-sizing: border-box;
+
+  background-color: white;
+  border-radius: 20px;
+
+  padding: 30px;
+`
+
+const StyledForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+    &Item {
+      &Label {
+        margin-bottom: 10px;
+      }
+  }
+`
+
+const StyledButton = styled(Button)`
+  align-self: center;
+`
 
 export default Login
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = getSessionServer(context)
+
+  if (!session) {
+    try {
+      const user = await AuthService.refresh(context.req.headers.cookie)
+      if (!user) {
+        return {
+          props: {},
+        }
+      }
+    } catch (e) {
+      return {
+        props: {},
+      }
+    }
+  }
+
   return {
-    props: {
-      csrfToken: await getCsrfToken(context),
+    redirect: {
+      destination: "/",
+      permanent: false,
     },
   }
 }

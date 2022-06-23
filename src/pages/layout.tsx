@@ -1,32 +1,11 @@
-import { useEffect } from "react"
-import { useSession, signOut } from "next-auth/react"
-import Link from "next/link"
-import { useRouter } from "next/router"
-import { Button } from "../components/button"
+import React from "react"
+import { Header } from "../components/header"
 
-const Layout = ({ children }: { children: JSX.Element }) => {
-  const { status } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    console.log("we are inside layout")
-    if (status === "unauthenticated") {
-      router.push("/login")
-    }
-  }, [status])
-
+const Layout: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <div>
-      <div>
-        HEADER
-        <Link href="/about">
-          <a>About</a>
-        </Link>
-        {/* redirect false to ne reload the page */}
-        <Button onClick={() => signOut({ redirect: false })}>sign out</Button>
-      </div>
+      <Header />
       {children}
-      FOOTER
     </div>
   )
 }

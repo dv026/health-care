@@ -4,7 +4,7 @@
 // })
 // module.exports = withBundleAnalyzer({})
 const nextConfig = {
-  reactStrictMode: true,
+  // reactStrictMode: true,
   // styledComponents: true,
 }
 

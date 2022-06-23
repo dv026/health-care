@@ -1,5 +1,6 @@
 import { FC } from "react"
 import styled, { css } from "styled-components"
+import { accentColor, disabledColor } from "../../common/colors"
 
 import { IMode } from "../../pages/login"
 
@@ -31,16 +32,16 @@ const Container = styled.div`
 const ModeItem = styled.div<{ active: boolean }>`
   cursor: pointer;
   height: 20px;
-  color: rgba(150, 150, 150, 0.5);
+  color: ${disabledColor};
 
   &:hover {
-    border-bottom: 1px solid blue;
+    border-bottom: 1px solid ${accentColor};
   }
 
   ${(props) =>
     props.active &&
     css`
-      border-bottom: 1px solid blue;
+      border-bottom: 1px solid ${accentColor};
       color: black;
     `}
 `
