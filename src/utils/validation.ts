@@ -3,6 +3,10 @@ export const validateCredentials = (username: string, password: string) => {
   return true
 }
 
+export const validateNumber = (value: string) => {
+  return Boolean(value.match(/^[0-9]*$/))
+}
+
 // import Document, { DocumentContext, DocumentInitialProps } from "next/document"
 // import { ServerStyleSheet } from "styled-components"
 

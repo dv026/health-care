@@ -3,10 +3,12 @@ import { useRouter } from "next/router"
 
 import { useStore } from "../stores/root-store"
 import { useSession } from "./session"
-import { AuthService } from "../services/auth.service"
+import { AuthService } from "../services/auth"
+import axios from "axios"
+import { ConfigService } from "../services/config"
 
 export const AuthGuard = ({ children }: any) => {
-  const { authStore } = useStore()
+  const { authStore, configStore } = useStore()
   const { push } = useRouter()
   const session = useSession()
 
@@ -14,10 +16,16 @@ export const AuthGuard = ({ children }: any) => {
 
   useEffect(() => {
     if (session) {
+      ConfigService.get().then((config) => {
+        if (config) {
+          configStore.setConfig(config)
+        }
+      })
       setAuth(true)
       authStore.setUser(session.user)
     } else {
-      AuthService.refresh()
+      axios
+        .get("/api/auth/refresh")
         .then((response) => {
           if (response) {
             setAuth(true)
@@ -27,7 +35,7 @@ export const AuthGuard = ({ children }: any) => {
           }
         })
         .catch(() => {
-          push('/login')
+          push("/login")
         })
     }
   }, [])

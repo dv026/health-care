@@ -1,14 +1,12 @@
 import axios from 'axios';
 import { AxiosResponse } from 'axios';
 
-import { AuthService } from './../services/auth.service';
-
 export const refreshMiddleware = (response: AxiosResponse<any, any>) => response
 
 export const refreshMiddlewareError = async (error: any) => {
   if (error.response.status === 401) {
     try {
-      const user = await AuthService.refresh()
+      const user = await axios.get('/api/auth/refresh')
       if (user) {
         axios.request(error.config)
       }

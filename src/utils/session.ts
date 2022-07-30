@@ -22,8 +22,8 @@ export const useSession = (): Nullable<Session> => {
 const extractDataFromAccessToken = (accessToken: string): Nullable<Session> => {
   if (!accessToken) return null
   try {
-    if (typeof process.env.NEXT_PUBLIC_TOKEN_SECRET == "string") {
-      return jwt.verify(accessToken, process.env.NEXT_PUBLIC_TOKEN_SECRET) as Session
+    if (typeof process.env.NEXT_PUBLIC_AUTH_JWT_ACCESS_SECRET == "string") {
+      return jwt.verify(accessToken, process.env.NEXT_PUBLIC_AUTH_JWT_ACCESS_SECRET) as Session
     }
     return null
   } catch (e) {
