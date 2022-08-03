@@ -3,10 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 const { parseCookies } = require('nookies');
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
+  console.log('123')
   const parsedCookies = parseCookies({ req });
  
   const res1 = await AuthService.refresh('refreshToken=' + parsedCookies.refreshToken)
-  console.log(res1)
   // return AuthService.refresh('refreshToken=' + parsedCookies.refreshToken)
   //   .then((response) => {
   //     console.log('data', response.data)
